@@ -4,3 +4,11 @@ target
 .settings/
 .classpath
 .project
+
+.gradle
+build/
+bin/
+out/
+gradle-app.setting
+!gradle-wrapper.jar
+.gradletasknamecache
