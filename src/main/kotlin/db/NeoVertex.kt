@@ -6,14 +6,14 @@ import org.neo4j.driver.v1.GraphDatabase
 import org.neo4j.driver.v1.Values
 import java.time.Instant
 
-private const val CONN_ADDR = "bolt://localhost:7687"
-private const val USER = "diplom-admin"
-private const val PASS = "admin"
+private const val connAddress = "bolt://localhost:7687"
+private const val username = "diplom-admin"
+private const val password = "admin"
 
 class NeoVertex: AbstractVerticle() {
     private val addNodeQuery = "CREATE (a:\$tid {body: \$body, ts: \$ts})"
-
-    private val driver = GraphDatabase.driver(CONN_ADDR, AuthTokens.basic(USER, PASS))
+    private val driver = GraphDatabase.driver(connAddress, AuthTokens.basic(username, password))
+    
     override fun start() {
 
     }
