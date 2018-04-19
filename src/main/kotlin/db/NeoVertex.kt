@@ -13,7 +13,7 @@ private const val password = "admin"
 class NeoVertex: AbstractVerticle() {
     private val addNodeQuery = "CREATE (a:\$tid {body: \$body, ts: \$ts})"
     private val driver = GraphDatabase.driver(connAddress, AuthTokens.basic(username, password))
-    
+
     override fun start() {
 
     }
