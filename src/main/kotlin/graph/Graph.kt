@@ -10,6 +10,10 @@ class Graph(initialRecord: Record) {
 
     fun registerRecord(record: Record) {
         val hashOfNode = record.body.hashCode()
+        if (hashOfNode == currentNode) {
+            addLoop(record.timestamp)
+            return
+        }
         addNode(hashOfNode, record.body, record.timestamp)
         addRelation(currentNode, hashOfNode, record.timestamp)
         currentNode = hashOfNode
@@ -28,16 +32,24 @@ class Graph(initialRecord: Record) {
     }
 
     private fun addNode(nodeAddress: Int, body: String, timestamp: Instant) {
-        nodes[nodeAddress] = Node(body, timestamp)
+        if (nodes[nodeAddress] == null) {
+            nodes[nodeAddress] = Node(body, timestamp)
+        } else {
+            nodes[nodeAddress]!!.timestamp = timestamp
+        }
     }
 
     private fun addRelation(source: Int, destination: Int, visitedTimestamp: Instant) {
         val relationsOfSource = nodes[source]!!.relations
-        if (relationsOfSource[destination] == null) {
-            relationsOfSource[destination] = Weight(visitedTimestamp)
-        } else {
-            relationsOfSource[destination]!!.recompute(visitedTimestamp)
-        }
+        relationsOfSource[destination]?.recompute(visitedTimestamp)
+                ?: relationsOfSource.put(destination, Weight(visitedTimestamp))
     }
+
+    private fun addLoop(timestamp: Instant) {
+        nodes[currentNode]!!.timestamp = timestamp
+        val selfRelation = nodes[currentNode]!!.relations
+        selfRelation[currentNode]?.recompute(timestamp) ?: selfRelation.put(currentNode, Weight(timestamp))
+    }
+
 
 }

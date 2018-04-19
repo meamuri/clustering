@@ -32,7 +32,19 @@ class GraphTest {
                     listOf("node", "label", "key", "value"))
         )
         assertEquals(2, graph.getNodes().size)
-        assertEquals(1, graph.getRelationsOf(SQL_QUERY)?.size)
-        assertEquals(0, graph.getRelationsOf(NEO4J_QUERY)?.size)
+        assertEquals(1, graph.getRelationsOf(SQL_QUERY)!!.size)
+        assertEquals(0, graph.getRelationsOf(NEO4J_QUERY)!!.size)
     }
+
+    @Test
+    fun `graph should resolve loop relations`() {
+        val graph = Graph(Record(TID, NEO4J_RELATION, Instant.ofEpochSecond(dayOfLife), listOf("does", "not", "matter")))
+        graph.registerRecord(
+                Record(TID, NEO4J_RELATION, Instant.ofEpochSecond(dayOfLife + dayInMilliseconds),
+                        listOf("node", "label", "key", "value"))
+        )
+        assertEquals(1, graph.getNodes().size)
+        assertEquals(1, graph.getRelationsOf(NEO4J_RELATION)!!.size)
+    }
+
 }
