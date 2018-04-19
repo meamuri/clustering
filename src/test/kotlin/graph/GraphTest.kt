@@ -5,17 +5,34 @@ import org.junit.Test
 import java.time.Instant
 import kotlin.test.assertEquals
 
-const val timeStampOf_2018_03_30: Long = 1522357200000
+// https://currentmillis.com/
+const val dayOfLife: Long = 1523739600000                   // 15 april 2018
+const val dayInMilliseconds: Long = 86400000                // 24 hours
+
+
 const val TID = 1
-const val SIMPLE_QUERY = "SELECT ? FROM ?"
+const val SQL_QUERY = "SELECT ? FROM ?"
+const val NEO4J_QUERY = "CREATE (?:? {? , ?}) )"
+const val NEO4J_MATCH = "MATCH (n:?)-[:?]->(friends) return n"
+const val NEO4J_RELATION = "CREATE (?)-[:?]->(ir),(?)-[:?]->(?)"
 
 class GraphTest {
 
     @Test
     fun `empty graph should create first node`() {
-        val graph = Graph()
-        val r = Record(TID, SIMPLE_QUERY, Instant.ofEpochSecond(timeStampOf_2018_03_30), listOf("*", "tableName"))
-        graph.registerRecord(r)
+        val graph = Graph(Record(TID, SQL_QUERY, Instant.ofEpochSecond(dayOfLife), listOf("*", "tableName")))
         assertEquals(1, graph.getNodes().size)
+    }
+
+    @Test
+    fun `graph provide access for creating two and more nodes`() {
+        val graph = Graph(Record(TID, SQL_QUERY, Instant.ofEpochSecond(dayOfLife), listOf("*", "tableName")))
+        graph.registerRecord(
+            Record(TID, NEO4J_QUERY, Instant.ofEpochSecond(dayOfLife + dayInMilliseconds),
+                    listOf("node", "label", "key", "value"))
+        )
+        assertEquals(2, graph.getNodes().size)
+        assertEquals(1, graph.getRelationsOf(SQL_QUERY)?.size)
+        assertEquals(0, graph.getRelationsOf(NEO4J_QUERY)?.size)
     }
 }
