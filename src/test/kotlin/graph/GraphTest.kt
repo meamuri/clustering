@@ -2,7 +2,6 @@ package graph
 
 import api.Record
 import org.junit.Test
-import java.time.Instant
 import kotlin.test.assertEquals
 
 // https://currentmillis.com/
@@ -20,16 +19,15 @@ class GraphTest {
 
     @Test
     fun `empty graph should create first node`() {
-        val graph = Graph(Record(TID, SQL_QUERY, Instant.ofEpochSecond(dayOfLife), listOf("*", "tableName")))
+        val graph = Graph(Record(TID, SQL_QUERY, dayOfLife, listOf("*", "tableName")))
         assertEquals(1, graph.getNodes().size)
     }
 
     @Test
     fun `graph provide access for creating two and more nodes`() {
-        val graph = Graph(Record(TID, SQL_QUERY, Instant.ofEpochSecond(dayOfLife), listOf("*", "tableName")))
+        val graph = Graph(Record(TID, SQL_QUERY, dayOfLife, listOf("*", "tableName")))
         graph.registerRecord(
-            Record(TID, NEO4J_QUERY, Instant.ofEpochSecond(dayOfLife + dayInMilliseconds),
-                    listOf("node", "label", "key", "value"))
+            Record(TID, NEO4J_QUERY, dayOfLife + dayInMilliseconds, listOf("node", "label", "key", "value"))
         )
         assertEquals(2, graph.getNodes().size)
         assertEquals(1, graph.getRelationsOf(SQL_QUERY)!!.size)
@@ -38,10 +36,10 @@ class GraphTest {
 
     @Test
     fun `graph should resolve loop relations`() {
-        val graph = Graph(Record(TID, NEO4J_RELATION, Instant.ofEpochSecond(dayOfLife), listOf("does", "not", "matter")))
+        val graph = Graph(Record(TID, NEO4J_RELATION, dayOfLife, listOf("does", "not", "matter")))
+        val tsTwo = dayOfLife + dayInMilliseconds
         graph.registerRecord(
-                Record(TID, NEO4J_RELATION, Instant.ofEpochSecond(dayOfLife + dayInMilliseconds),
-                        listOf("node", "label", "key", "value"))
+                Record(TID, NEO4J_RELATION, tsTwo, listOf("node", "label", "key", "value"))
         )
         assertEquals(1, graph.getNodes().size)
         assertEquals(1, graph.getRelationsOf(NEO4J_RELATION)!!.size)
@@ -49,21 +47,21 @@ class GraphTest {
 
     @Test
     fun `graph with strong topology`() {
-        val graph = Graph(Record(TID, SQL_QUERY, Instant.ofEpochSecond(dayOfLife), listOf("does", "not", "matter")))
+        val graph = Graph(Record(TID, SQL_QUERY, dayOfLife, listOf("does", "not", "matter")))
         graph.registerRecord(
-                Record(TID, NEO4J_RELATION, Instant.ofEpochSecond(dayOfLife + dayInMilliseconds),
+                Record(TID, NEO4J_RELATION, dayOfLife + dayInMilliseconds,
                         listOf("node", "label", "key", "value"))
         )
         graph.registerRecord(
-                Record(TID, NEO4J_MATCH, Instant.ofEpochSecond(dayOfLife + dayInMilliseconds),
+                Record(TID, NEO4J_MATCH, dayOfLife + dayInMilliseconds + 100,
                         listOf("node", "label", "key", "value"))
         )
         graph.registerRecord(
-                Record(TID, SQL_QUERY, Instant.ofEpochSecond(dayOfLife + dayInMilliseconds),
+                Record(TID, SQL_QUERY, dayOfLife + dayInMilliseconds + 1000,
                         listOf("node", "label", "key", "value"))
         )
         graph.registerRecord(
-                Record(TID, NEO4J_QUERY, Instant.ofEpochSecond(dayOfLife + dayInMilliseconds),
+                Record(TID, NEO4J_QUERY, dayOfLife + dayInMilliseconds + 10000,
                         listOf("node", "label", "key", "value"))
         )
         assertEquals(4, graph.getNodes().size)
