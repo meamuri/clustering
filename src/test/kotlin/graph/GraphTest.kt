@@ -13,9 +13,9 @@ class GraphTest {
 
     @Test
     fun `empty graph should create first node`() {
-        val graph: Graph = Graph()
+        val graph = Graph()
         val r = Record(TID, SIMPLE_QUERY, Instant.ofEpochSecond(timeStampOf_2018_03_30), listOf("*", "tableName"))
         graph.registerRecord(r)
-        assertEquals(1, graph.getNodes().size())
+        assertEquals(1, graph.getNodes().size)
     }
 }

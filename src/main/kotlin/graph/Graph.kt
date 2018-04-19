@@ -3,12 +3,15 @@ package graph
 import api.Record
 
 class Graph {
+    private val nodes: MutableMap<Int, Node> = HashMap()
+
     fun registerRecord(record: Record) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val hashOfNode = record.body.hashCode()
+        nodes[hashOfNode] = Node(record.body)
     }
 
     fun getNodes(): List<String> {
-        return listOf()
+        return nodes.values.map { it.body }
     }
 
 }
