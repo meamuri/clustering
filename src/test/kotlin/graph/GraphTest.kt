@@ -47,4 +47,29 @@ class GraphTest {
         assertEquals(1, graph.getRelationsOf(NEO4J_RELATION)!!.size)
     }
 
+    @Test
+    fun `graph with strong topology`() {
+        val graph = Graph(Record(TID, SQL_QUERY, Instant.ofEpochSecond(dayOfLife), listOf("does", "not", "matter")))
+        graph.registerRecord(
+                Record(TID, NEO4J_RELATION, Instant.ofEpochSecond(dayOfLife + dayInMilliseconds),
+                        listOf("node", "label", "key", "value"))
+        )
+        graph.registerRecord(
+                Record(TID, NEO4J_MATCH, Instant.ofEpochSecond(dayOfLife + dayInMilliseconds),
+                        listOf("node", "label", "key", "value"))
+        )
+        graph.registerRecord(
+                Record(TID, SQL_QUERY, Instant.ofEpochSecond(dayOfLife + dayInMilliseconds),
+                        listOf("node", "label", "key", "value"))
+        )
+        graph.registerRecord(
+                Record(TID, NEO4J_QUERY, Instant.ofEpochSecond(dayOfLife + dayInMilliseconds),
+                        listOf("node", "label", "key", "value"))
+        )
+        assertEquals(4, graph.getNodes().size)
+        assertEquals(2, graph.getRelationsOf(SQL_QUERY)!!.size)
+        assertEquals(1, graph.getRelationsOf(NEO4J_RELATION)!!.size)
+        assertEquals(1, graph.getRelationsOf(NEO4J_MATCH)!!.size)
+        assertEquals(0, graph.getRelationsOf(NEO4J_QUERY)!!.size)
+    }
 }
