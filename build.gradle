@@ -22,6 +22,7 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
     compile 'io.vertx:vertx-web:3.5.1'
+    compile 'org.neo4j.driver:neo4j-java-driver:1.5.1'
 }
 
 compileKotlin {
