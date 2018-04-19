@@ -6,8 +6,6 @@ import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.handler.BodyHandler
 
 class Receiver: AbstractVerticle() {
-    private val eventBus = vertx.eventBus()
-
     override fun start() {
         val router = Router.router(vertx)
         router.route().handler(BodyHandler.create())
@@ -17,7 +15,7 @@ class Receiver: AbstractVerticle() {
 
     private fun handleNewRecord(routingContext: RoutingContext) {
         val body = routingContext.bodyAsJson
-        eventBus.publish("records-feed", body)
+        vertx.eventBus().publish("records-feed", body)
     }
 
 }
