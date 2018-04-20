@@ -5,6 +5,7 @@ import io.vertx.core.AbstractVerticle
 import io.vertx.core.Future
 
 const val ManagerControlMax = 5
+const val MetricLevel = 0.3
 
 class Manager: AbstractVerticle() {
     private val graphs: MutableList<Graph> = mutableListOf()
@@ -30,7 +31,15 @@ class Manager: AbstractVerticle() {
     }
 
     private fun clustering() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        for (i in 0 until graphs.lastIndex) {
+            for (j in i + 1..graphs.lastIndex) {
+                if (getMetrics(graphs[i], graphs[j]) > MetricLevel) {
+                    merge(i, j)
+                    return
+                }
+            }
+        }
+        merge(graphs.lastIndex, 0)
     }
 
     fun findTidProcessor(tid: Int): Int = tidToProcessor[tid] ?: -1
@@ -38,5 +47,9 @@ class Manager: AbstractVerticle() {
     fun getGraphOfTid(tid: Int): Graph? {
         val index = findTidProcessor(tid)
         return if (index == -1) null else graphs[index]
+    }
+
+    private fun merge(sourceIndex: Int, destinationIndex: Int) {
+
     }
 }

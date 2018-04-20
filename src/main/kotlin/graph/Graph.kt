@@ -52,5 +52,4 @@ class Graph(initialRecord: Record) {
         selfRelation[currentNode]?.recompute(timestamp) ?: selfRelation.put(currentNode, Weight(timestamp))
     }
 
-
 }
