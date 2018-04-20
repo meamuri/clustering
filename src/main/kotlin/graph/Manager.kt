@@ -50,6 +50,9 @@ class Manager: AbstractVerticle() {
     }
 
     private fun merge(sourceIndex: Int, destinationIndex: Int) {
+        val graph = graphs[sourceIndex]
+        graphs.removeAt(sourceIndex)
 
+        graphs[destinationIndex].merge(graph)
     }
 }

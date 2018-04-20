@@ -32,6 +32,10 @@ class Graph(initialRecord: Record) {
         return nodes[address]!!.relations.map {it.toPair()}
     }
 
+    fun merge(graph: Graph) {
+
+    }
+
     private fun addNode(nodeAddress: Int, body: String, timestamp: Instant) {
         if (nodes[nodeAddress] == null) {
             nodes[nodeAddress] = Node(body, timestamp)
