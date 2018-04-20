@@ -10,8 +10,7 @@ class Manager: AbstractVerticle() {
     private val graphs: MutableList<Graph> = mutableListOf()
     private val tidToProcessor: MutableMap<Int, Int> = mutableMapOf()
 
-    var currentExecutor = -1
-        private set
+    val countOfGraphs get() = graphs.size
 
     override fun start(startFuture: Future<Void>?) {
 
@@ -23,9 +22,15 @@ class Manager: AbstractVerticle() {
             graphs[processorIndex].registerRecord(record)
             return
         }
-        currentExecutor++
-        tidToProcessor[record.tid] = currentExecutor
+        if (countOfGraphs == ManagerControlMax) {
+            clustering()
+        }
         graphs.add(Graph(record))
+        tidToProcessor[record.tid] = graphs.lastIndex
+    }
+
+    private fun clustering() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     fun findTidProcessor(tid: Int): Int = tidToProcessor[tid] ?: -1
