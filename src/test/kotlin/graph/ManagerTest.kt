@@ -69,4 +69,22 @@ class ManagerTest {
         assertEquals(4, manager.findTidProcessor(ManagerControlMax))
     }
 
+    @Test
+    fun `node should be placed in new parent-graph`() {
+        val range = (0 until ManagerControlMax)
+        range.map{ manager.registerRecord(recordGenerator(it, it.toString())) }
+        assertEquals(0, manager.findTidProcessor(0))
+        assertEquals(1, manager.findTidProcessor(1))
+        assertEquals(2, manager.findTidProcessor(2))
+        assertEquals(3, manager.findTidProcessor(3))
+        assertEquals(4, manager.findTidProcessor(4))
+
+        val extraTid = 10
+        manager.registerRecord(recordGenerator(extraTid, extraTid.toString()))
+        val srcToDestPair = manager.getMergePair()
+        val graph = manager.getGraphOfTid(srcToDestPair.second)
+        assertEquals(2, graph!!.getNodes().size)
+
+    }
+
 }
