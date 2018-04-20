@@ -1,26 +1,44 @@
 package service
 
+import api.jsonToRecord
 import io.vertx.core.AbstractVerticle
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.handler.BodyHandler
+import settings.Port
 import settings.RecordsChannel
 
 class Receiver: AbstractVerticle() {
+    val path = "/"
+
     override fun start() {
         val router = Router.router(vertx)
         router.route().handler(BodyHandler.create())
-        router.post("/").handler(this::handleNewRecord)
-        vertx.createHttpServer().requestHandler(router::accept).listen(8080)
+        router.post(path).handler(this::handleNewRecord)
+        vertx.createHttpServer().requestHandler(router::accept).listen(Port)
     }
 
     private fun handleNewRecord(routingContext: RoutingContext) {
+        println("get request for processing")
         val response = routingContext.response()
-        val body = routingContext.bodyAsString
-        vertx.eventBus().send<String>(RecordsChannel, body, {
+
+        val record = routingContext.bodyAsString
+        if (!isCorrectRecord(record)) {
+            println("incorrect request data")
+            response.setStatusCode(400).end()
+            return
+        }
+
+        println("request was processed")
+        vertx.eventBus().send<String>(RecordsChannel, record, {
             val msg = if (it.succeeded()) "success" else "error"
             println("result of receiving: $msg")
         })
         response.end()
     }
+
+    private fun isCorrectRecord(record: String): Boolean {
+        return jsonToRecord(record) != null
+    }
+
 }
