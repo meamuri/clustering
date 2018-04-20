@@ -1,6 +1,6 @@
 package service
 
-import api.jsonToRecord
+import api.Record
 import graph.Manager
 import io.vertx.core.AbstractVerticle
 import settings.RecordsChannel
@@ -9,7 +9,7 @@ class Core: AbstractVerticle() {
     private val manager = Manager()
     override fun start() {
         vertx.eventBus().consumer<String>(RecordsChannel, {
-            val record = jsonToRecord(it.body())
+            val record = Record.fromJsonString(it.body())
             if (record != null) {
                 manager.registerRecord(record)
             }

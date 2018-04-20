@@ -1,6 +1,6 @@
 package service
 
-import api.jsonToRecord
+import api.Record
 import io.vertx.core.AbstractVerticle
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
@@ -9,7 +9,7 @@ import settings.Port
 import settings.RecordsChannel
 
 class Receiver: AbstractVerticle() {
-    val path = "/"
+    private val path = "/"
 
     override fun start() {
         val router = Router.router(vertx)
@@ -38,7 +38,7 @@ class Receiver: AbstractVerticle() {
     }
 
     private fun isCorrectRecord(record: String): Boolean {
-        return jsonToRecord(record) != null
+        return Record.fromJsonString(record) != null
     }
 
 }
