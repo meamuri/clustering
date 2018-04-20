@@ -57,12 +57,15 @@ class ManagerTest {
         assertEquals(2, manager.findTidProcessor(2))
         assertEquals(3, manager.findTidProcessor(3))
         assertEquals(4, manager.findTidProcessor(4))
+        val srcToDestPair = manager.getMergePair()
         manager.registerRecord(recordGenerator(ManagerControlMax, "J"))
         assertEquals(0, manager.findTidProcessor(0))
         assertEquals(1, manager.findTidProcessor(1))
         assertEquals(2, manager.findTidProcessor(2))
         assertEquals(3, manager.findTidProcessor(3))
-        assertEquals(0, manager.findTidProcessor(4))
+        val tidThatEqualWithProcessorIndexAtThisTest = srcToDestPair.first // a little test hack
+        // it's possible because tid has pairing: 0 -> 0, 1 -> 1, 2 -> 2,
+        assertEquals(srcToDestPair.second, manager.findTidProcessor(tidThatEqualWithProcessorIndexAtThisTest))
         assertEquals(4, manager.findTidProcessor(ManagerControlMax))
     }
 

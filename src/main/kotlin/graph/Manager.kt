@@ -39,22 +39,21 @@ class Manager: AbstractVerticle() {
     }
 
     private fun clustering(record: Record) {
-        val index = clustering()
-        graphs[index] = Graph(record)
-        tidToProcessor[record.tid] = index
+        val srcToDestPair = getMergePair()
+        merge(srcToDestPair.first, srcToDestPair.second)
+        graphs[srcToDestPair.first] = Graph(record)
+        tidToProcessor[record.tid] = srcToDestPair.first
     }
 
-    private fun clustering(): Int {
+    fun getMergePair(): Pair<Int, Int> {
         for (i in 0 until graphs.lastIndex) {
             for (j in i + 1..graphs.lastIndex) {
                 if (getMetrics(graphs[i], graphs[j]) > MetricLevel) {
-                    merge(i, j)
-                    return i
+                    return Pair(i, j)
                 }
             }
         }
-        merge(graphs.lastIndex, 0)
-        return graphs.lastIndex
+        return Pair(graphs.lastIndex, 0)
     }
 
     private fun merge(sourceIndex: Int, destinationIndex: Int) {
