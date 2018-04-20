@@ -1,5 +1,6 @@
 package graph
 
+import api.Record
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.Future
 
@@ -14,7 +15,8 @@ class Manager: AbstractVerticle() {
 
     }
 
-    fun registerRecord() {
-
+    fun registerRecord(record: Record) {
+        currentExecutor++
+        graphs.add(Graph(record))
     }
 }
