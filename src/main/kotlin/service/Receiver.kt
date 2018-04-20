@@ -1,6 +1,5 @@
 package service
 
-import com.google.gson.JsonObject
 import io.vertx.core.AbstractVerticle
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
@@ -18,7 +17,7 @@ class Receiver: AbstractVerticle() {
     private fun handleNewRecord(routingContext: RoutingContext) {
         val response = routingContext.response()
         val body = routingContext.bodyAsString
-        vertx.eventBus().send<JsonObject>(RecordsChannel, body, {
+        vertx.eventBus().send<String>(RecordsChannel, body, {
             val msg = if (it.succeeded()) "success" else "error"
             println("result of receiving: $msg")
         })
