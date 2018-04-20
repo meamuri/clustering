@@ -18,7 +18,7 @@ const val NEO4J_RELATION = "CREATE (?)-[:?]->(ir),(?)-[:?]->(?)"
 fun getRecord(body: String, dayShift: Int = 0): Record =
         Record(TID, body, dayOfLife + dayInMilliseconds * dayShift, listOf("does", "not", "matter"))
 
-fun recordGenerator(): (String) -> Record {
+fun getRecordGenerator(): (String) -> Record {
     var day = -1
     return { v ->
         day++
