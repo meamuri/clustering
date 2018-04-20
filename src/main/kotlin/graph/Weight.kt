@@ -9,7 +9,7 @@ class Weight(timestamp: Instant) {
         private set
     var max = timestamp
         private set
-    var delta = Instant.MIN
+    var delta: Instant = Instant.MIN
         private set
     var dispersion = 0.0
         private set
@@ -21,6 +21,17 @@ class Weight(timestamp: Instant) {
         } else if (timestamp > max) {
             max = timestamp
         }
+        recompute()
+    }
+
+    fun recompute(other: Weight) {
+        cnt += other.cnt
+        min = if (other.min < min) other.min else min
+        max = if (other.max > max) other.max else max
+        recompute()
+    }
+
+    private fun recompute() {
         delta = max.minusMillis(min.toEpochMilli())
         dispersion = delta.toEpochMilli() / cnt.toDouble()
     }

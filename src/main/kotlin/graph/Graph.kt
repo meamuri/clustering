@@ -35,7 +35,16 @@ class Graph(initialRecord: Record) {
     fun merge(graph: Graph) {
         graph.nodes.forEach({
             if (it.key !in nodes.keys) {
-
+                nodes[it.key.hashCode()] = it.value
+            } else {
+                val existedNodeRelations = nodes[it.key]!!.relations
+                it.value.relations.forEach({
+                    if (it.key in existedNodeRelations.keys) {
+                        existedNodeRelations[it.key]!!.recompute(it.value)
+                    } else {
+                        existedNodeRelations[it.key] = it.value
+                    }
+                })
             }
         })
     }

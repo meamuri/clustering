@@ -4,6 +4,7 @@ import api.Record
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class ManagerTest {
 
@@ -79,12 +80,12 @@ class ManagerTest {
         assertEquals(3, manager.findTidProcessor(3))
         assertEquals(4, manager.findTidProcessor(4))
 
-        val extraTid = 10
-        manager.registerRecord(recordGenerator(extraTid, extraTid.toString()))
+        manager.registerRecord(recordGenerator(ManagerControlMax, ManagerControlMax.toString()))
         val srcToDestPair = manager.getMergePair()
         val graph = manager.getGraphOfTid(srcToDestPair.second)
         assertEquals(2, graph!!.getNodes().size)
-
+        assertTrue { graph.getNodes().contains(srcToDestPair.second.toString()) }
+        assertTrue { graph.getNodes().contains(srcToDestPair.first.toString()) }
     }
 
 }
