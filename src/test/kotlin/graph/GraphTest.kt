@@ -4,31 +4,19 @@ import api.Record
 import org.junit.Test
 import kotlin.test.assertEquals
 
-// https://currentmillis.com/
-const val dayOfLife: Long = 1523739600000                   // 15 april 2018
-const val dayInMilliseconds: Long = 86400000                // 24 hours
-
-
-const val TID = 1
-const val SQL_QUERY = "SELECT ? FROM ?"
-const val NEO4J_QUERY = "CREATE (?:? {? , ?}) )"
-const val NEO4J_MATCH = "MATCH (n:?)-[:?]->(friends) return n"
-const val NEO4J_RELATION = "CREATE (?)-[:?]->(ir),(?)-[:?]->(?)"
 
 class GraphTest {
 
     @Test
     fun `empty graph should create first node`() {
-        val graph = Graph(Record(TID, SQL_QUERY, dayOfLife, listOf("*", "tableName")))
+        val graph = Graph(getRecord(SQL_QUERY))
         assertEquals(1, graph.getNodes().size)
     }
 
     @Test
     fun `graph provide access for creating two and more nodes`() {
-        val graph = Graph(Record(TID, SQL_QUERY, dayOfLife, listOf("*", "tableName")))
-        graph.registerRecord(
-            Record(TID, NEO4J_QUERY, dayOfLife + dayInMilliseconds, listOf("node", "label", "key", "value"))
-        )
+        val graph = Graph(getRecord(SQL_QUERY))
+        graph.registerRecord(getRecord(NEO4J_QUERY, 1))
         assertEquals(2, graph.getNodes().size)
         assertEquals(1, graph.getRelationsOf(SQL_QUERY)!!.size)
         assertEquals(0, graph.getRelationsOf(NEO4J_QUERY)!!.size)
@@ -36,11 +24,8 @@ class GraphTest {
 
     @Test
     fun `graph should resolve loop relations`() {
-        val graph = Graph(Record(TID, NEO4J_RELATION, dayOfLife, listOf("does", "not", "matter")))
-        val tsTwo = dayOfLife + dayInMilliseconds
-        graph.registerRecord(
-                Record(TID, NEO4J_RELATION, tsTwo, listOf("node", "label", "key", "value"))
-        )
+        val graph = Graph(getRecord(NEO4J_RELATION, 1))
+        graph.registerRecord(getRecord(NEO4J_RELATION, 1))
         assertEquals(1, graph.getNodes().size)
         assertEquals(1, graph.getRelationsOf(NEO4J_RELATION)!!.size)
     }
@@ -48,22 +33,10 @@ class GraphTest {
     @Test
     fun `graph with strong topology`() {
         val graph = Graph(Record(TID, SQL_QUERY, dayOfLife, listOf("does", "not", "matter")))
-        graph.registerRecord(
-                Record(TID, NEO4J_RELATION, dayOfLife + dayInMilliseconds,
-                        listOf("node", "label", "key", "value"))
-        )
-        graph.registerRecord(
-                Record(TID, NEO4J_MATCH, dayOfLife + dayInMilliseconds + 100,
-                        listOf("node", "label", "key", "value"))
-        )
-        graph.registerRecord(
-                Record(TID, SQL_QUERY, dayOfLife + dayInMilliseconds + 1000,
-                        listOf("node", "label", "key", "value"))
-        )
-        graph.registerRecord(
-                Record(TID, NEO4J_QUERY, dayOfLife + dayInMilliseconds + 10000,
-                        listOf("node", "label", "key", "value"))
-        )
+        graph.registerRecord(getRecord(NEO4J_RELATION, 1))
+        graph.registerRecord(getRecord(NEO4J_MATCH, 2))
+        graph.registerRecord(getRecord(SQL_QUERY, 3))
+        graph.registerRecord(getRecord(NEO4J_QUERY, 4))
         assertEquals(4, graph.getNodes().size)
         assertEquals(2, graph.getRelationsOf(SQL_QUERY)!!.size)
         assertEquals(1, graph.getRelationsOf(NEO4J_RELATION)!!.size)
