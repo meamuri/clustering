@@ -16,7 +16,7 @@ class Receiver: AbstractVerticle() {
     private fun handleNewRecord(routingContext: RoutingContext) {
         val response = routingContext.response()
         val body = routingContext.bodyAsJson
-        vertx.eventBus().publish("records-feed", body)
+        vertx.eventBus().send("records-feed", body)
         response.end()
     }
 

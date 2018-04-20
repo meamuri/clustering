@@ -1,28 +1,15 @@
 package graph
 
 import api.Record
-import com.google.gson.Gson
-import io.vertx.core.AbstractVerticle
-import io.vertx.core.Future
 
 const val ManagerControlMax = 5
 const val MetricLevel = 0.3
 
-class Manager: AbstractVerticle() {
+class Manager {
     private val graphs: MutableList<Graph> = mutableListOf()
     private val tidToProcessor: MutableMap<Int, Int> = mutableMapOf()
 
     val countOfGraphs get() = graphs.size
-
-    override fun start(startFuture: Future<Void>?) {
-        val eb = vertx.eventBus()
-        eb.consumer<Any>("records-feed", {
-            println("hello!")
-            val record = Gson().fromJson(it.body().toString(), Record::class.java)
-            registerRecord(record)
-            println("$record was added to cluster")
-        })
-    }
 
     fun registerRecord(record: Record) {
         val processorIndex = tidToProcessor[record.tid]

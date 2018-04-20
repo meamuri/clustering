@@ -7,7 +7,7 @@ private val baseOptions = VertxOptions().setClustered(false)
 fun main(args: Array<String>) {
     deployVertex("db.NeoVertex", true)
     deployVertex("gateway.Receiver")
-    deployVertex("graph.Manager")
+    deployVertex("service.Core")
 }
 
 fun deployVertex(vertexName: String, isWorker: Boolean = false) {
