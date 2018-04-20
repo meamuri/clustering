@@ -24,22 +24,11 @@ class Manager: AbstractVerticle() {
             return
         }
         if (countOfGraphs == ManagerControlMax) {
-            clustering()
+            clustering(record)
+            return
         }
         graphs.add(Graph(record))
         tidToProcessor[record.tid] = graphs.lastIndex
-    }
-
-    private fun clustering() {
-        for (i in 0 until graphs.lastIndex) {
-            for (j in i + 1..graphs.lastIndex) {
-                if (getMetrics(graphs[i], graphs[j]) > MetricLevel) {
-                    merge(i, j)
-                    return
-                }
-            }
-        }
-        merge(graphs.lastIndex, 0)
     }
 
     fun findTidProcessor(tid: Int): Int = tidToProcessor[tid] ?: -1
@@ -49,10 +38,36 @@ class Manager: AbstractVerticle() {
         return if (index == -1) null else graphs[index]
     }
 
+    private fun clustering(record: Record) {
+        val index = clustering()
+        graphs[index] = Graph(record)
+        tidToProcessor[record.tid] = index
+    }
+
+    private fun clustering(): Int {
+        for (i in 0 until graphs.lastIndex) {
+            for (j in i + 1..graphs.lastIndex) {
+                if (getMetrics(graphs[i], graphs[j]) > MetricLevel) {
+                    merge(i, j)
+                    return i
+                }
+            }
+        }
+        merge(graphs.lastIndex, 0)
+        return graphs.lastIndex
+    }
+
     private fun merge(sourceIndex: Int, destinationIndex: Int) {
         val graph = graphs[sourceIndex]
-        graphs.removeAt(sourceIndex)
-
         graphs[destinationIndex].merge(graph)
+        tidRelinking(sourceIndex, destinationIndex)
+    }
+
+    private fun tidRelinking(fromProcess: Int, toProcess: Int) {
+        for ((tid, processPos) in tidToProcessor) {
+            if (processPos == fromProcess) {
+                tidToProcessor[tid] = toProcess
+            }
+        }
     }
 }

@@ -48,4 +48,22 @@ class ManagerTest {
         assertEquals(ManagerControlMax, manager.countOfGraphs)
     }
 
+    @Test
+    fun `TIDs after clustering should be mapped correctly`() {
+        listOf("a", "b", "c", "d", "e")
+                .mapIndexed { index, body -> manager.registerRecord(recordGenerator(index, body)) }
+        assertEquals(0, manager.findTidProcessor(0))
+        assertEquals(1, manager.findTidProcessor(1))
+        assertEquals(2, manager.findTidProcessor(2))
+        assertEquals(3, manager.findTidProcessor(3))
+        assertEquals(4, manager.findTidProcessor(4))
+        manager.registerRecord(recordGenerator(ManagerControlMax, "J"))
+        assertEquals(0, manager.findTidProcessor(0))
+        assertEquals(1, manager.findTidProcessor(1))
+        assertEquals(2, manager.findTidProcessor(2))
+        assertEquals(3, manager.findTidProcessor(3))
+        assertEquals(0, manager.findTidProcessor(4))
+        assertEquals(4, manager.findTidProcessor(ManagerControlMax))
+    }
+
 }

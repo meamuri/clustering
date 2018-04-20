@@ -33,7 +33,11 @@ class Graph(initialRecord: Record) {
     }
 
     fun merge(graph: Graph) {
+        graph.nodes.forEach({
+            if (it.key !in nodes.keys) {
 
+            }
+        })
     }
 
     private fun addNode(nodeAddress: Int, body: String, timestamp: Instant) {
