@@ -40,4 +40,12 @@ class ManagerTest {
         assertEquals(2, manager.getGraphOfTid(TID)!!.getNodes().size)
     }
 
+    @Test
+    fun `huge number of TIDs should be merged`() {
+        for (i in 0 until ManagerControlMax) { manager.registerRecord(recordGenerator(i, NEO4J_MATCH)) }
+        assertEquals(ManagerControlMax - 1, manager.currentExecutor)
+        manager.registerRecord(recordGenerator(ManagerControlMax, NEO4J_MATCH))
+        assertEquals(ManagerControlMax - 1, manager.currentExecutor)
+    }
+
 }

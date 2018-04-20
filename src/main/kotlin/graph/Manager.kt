@@ -18,10 +18,14 @@ class Manager: AbstractVerticle() {
     }
 
     fun registerRecord(record: Record) {
+        val processorIndex = tidToProcessor[record.tid]
+        if (processorIndex != null) {
+            graphs[processorIndex].registerRecord(record)
+            return
+        }
         currentExecutor++
-
-        graphs.add(Graph(record))
         tidToProcessor[record.tid] = currentExecutor
+        graphs.add(Graph(record))
     }
 
     fun findTidProcessor(tid: Int): Int = tidToProcessor[tid] ?: -1
