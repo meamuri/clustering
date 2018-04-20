@@ -1,9 +1,11 @@
-package gateway
+package service
 
+import com.google.gson.JsonObject
 import io.vertx.core.AbstractVerticle
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.handler.BodyHandler
+import settings.RecordsChannel
 
 class Receiver: AbstractVerticle() {
     override fun start() {
@@ -15,9 +17,11 @@ class Receiver: AbstractVerticle() {
 
     private fun handleNewRecord(routingContext: RoutingContext) {
         val response = routingContext.response()
-        val body = routingContext.bodyAsJson
-        vertx.eventBus().send("records-feed", body)
+        val body = routingContext.bodyAsString
+        vertx.eventBus().send<JsonObject>(RecordsChannel, body, {
+            val msg = if (it.succeeded()) "success" else "error"
+            println("result of receiving: $msg")
+        })
         response.end()
     }
-
 }

@@ -5,8 +5,8 @@ import io.vertx.core.VertxOptions
 private val baseOptions = VertxOptions().setClustered(false)
 
 fun main(args: Array<String>) {
-    deployVertex("db.NeoVertex", true)
-    deployVertex("gateway.Receiver")
+    deployVertex("service.NeoVertex", true)
+    deployVertex("service.Receiver")
     deployVertex("service.Core")
 }
 

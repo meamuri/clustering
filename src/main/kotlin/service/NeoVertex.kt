@@ -1,4 +1,4 @@
-package db
+package service
 
 import io.vertx.core.AbstractVerticle
 import org.neo4j.driver.v1.AuthTokens
