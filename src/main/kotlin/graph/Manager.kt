@@ -1,6 +1,7 @@
 package graph
 
 import api.Record
+import com.google.gson.Gson
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.Future
 
@@ -14,7 +15,13 @@ class Manager: AbstractVerticle() {
     val countOfGraphs get() = graphs.size
 
     override fun start(startFuture: Future<Void>?) {
-
+        val eb = vertx.eventBus()
+        eb.consumer<Any>("records-feed", {
+            println("hello!")
+            val record = Gson().fromJson(it.body().toString(), Record::class.java)
+            registerRecord(record)
+            println("$record was added to cluster")
+        })
     }
 
     fun registerRecord(record: Record) {
