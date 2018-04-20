@@ -31,4 +31,13 @@ class ManagerTest {
         assertEquals(1, manager.currentExecutor)
     }
 
+    @Test
+    fun `record with same TIDs should be placed in same processors`() {
+        manager.registerRecord(recordGenerator(TID, NEO4J_RELATION))
+        manager.registerRecord(recordGenerator(TID, NEO4J_QUERY))
+        assertEquals(0, manager.findTidProcessor(TID))
+        assertEquals(0, manager.currentExecutor)
+        assertEquals(2, manager.getGraphOfTid(TID)!!.getNodes().size)
+    }
+
 }
