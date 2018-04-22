@@ -1,0 +1,12 @@
+{
+    "records": [
+        {"tid": 1, "body": "SELECT * FROM t", "timestamp": 1523739600000, "params": [] },
+        {"tid": 1, "body": "SELECT id FROM t where id > ?", "timestamp": 1523912400000, "params": [] },
+        {"tid": 1, "body": "query {repository(owner: \"user\") {name. description} }", "timestamp": 1523998800000, "params": [] },
+        {"tid": 1, "body": "db.collection.find({id: ??})", "timestamp": 1524085200000, "params": [] },
+        {"tid": 1, "body": "db.collection.find({id: ??}, {_id: 0, description: 1})", "timestamp": 1524171600000, "params": [] },
+        {"tid": 1, "body": "db.collection.find({id: ??}.toArray()", "timestamp": 1524171600000, "params": [] },
+        {"tid": 1, "body": "db.collection.find({id: ??}.limit(?)", "timestamp": 1524258000000, "params": [] },
+        {"tid": 1, "body": "MATCH (f:?) where f.body=?", "timestamp": 1524344400000, "params": [] },
+    ]
+}
