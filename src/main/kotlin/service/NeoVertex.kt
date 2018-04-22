@@ -6,6 +6,7 @@ import io.vertx.core.eventbus.Message
 import io.vertx.core.json.JsonObject
 import org.neo4j.driver.v1.*
 import service.messaging.ResultType
+import service.messaging.WasClustered
 import service.messaging.WasCreated
 import service.messaging.WasProcessed
 import settings.GraphSaverChannel
@@ -25,12 +26,13 @@ class NeoVertex: AbstractVerticle() {
             "CREATE (t:$validGraphName {body: \$NEW_BODY, ts: \$TS }) \n" +
             "CREATE (f)-[:Linked {min: \$MIN, max: \$MAX, delta: \$DELTA, dispersion: \$D}]->(t)"
     }
-
     private val addLoopToExistedNode = { validGraphName: String ->
         "MATCH (f:$validGraphName), (t:$validGraphName) where f.body = \$FROM AND t.body = \$TO \n" +
                 "CREATE (f)-[:Linked {min: \$MIN, max: \$MAX, delta: \$DELTA, dispersion: \$D}]->(t) \n" +
                 "SET t.ts = \$TS"
     }
+    private fun swapLabel(from: String, to: String): String =
+            "MATCH (node:$from) remove (node:$from) set (node:$to)"
 
     private val driver = GraphDatabase.driver(connAddress, AuthTokens.basic(username, password))
 
@@ -58,6 +60,10 @@ class NeoVertex: AbstractVerticle() {
                     writeNodeAndLinking(json.label, json.prevBody, json.body,
                             Instant.ofEpochMilli(json.ts), json.min, json.max, json.delta, json.dispersion)
                 }
+            }
+            ResultType.Clustered.name -> {
+                val json = Gson().fromJson(r.toString(), WasClustered::class.java)
+                clusterIt(json.labelBefore, json.labelAfter)
             }
             else -> return
         }
@@ -118,5 +124,15 @@ class NeoVertex: AbstractVerticle() {
             }
         } // .. session use
     } // fun writeNode
+
+    private fun clusterIt(labelBefore: String, labelAfter: String) {
+        val session = driver.session()
+
+        session.use {
+            session.writeTransaction { tx ->
+                tx.run(swapLabel(labelBefore, labelAfter))
+            }
+        } // .. session use
+    }
 
 }

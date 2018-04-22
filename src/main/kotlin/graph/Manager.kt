@@ -46,8 +46,8 @@ class Manager: AbstractVerticle() {
             return WasProcessed(lbl, prevNode, record.body, record.timestamp, Weight(record.timestamp), isLoop)
         }
         if (countOfGraphs == ManagerControlMax) {
-            clustering(record)
-            return WasClustered()
+            val pair = clustering(record)
+            return WasClustered(generateLabel(pair.first), generateLabel(pair.second))
         }
         graphs.add(Graph(record))
         tidToProcessor[record.tid] = graphs.lastIndex
@@ -61,11 +61,12 @@ class Manager: AbstractVerticle() {
         return if (index == -1) null else graphs[index]
     }
 
-    private fun clustering(record: Record) {
+    private fun clustering(record: Record): Pair<Int, Int> {
         val srcToDestPair = getMergePair()
         merge(srcToDestPair.first, srcToDestPair.second)
         graphs[srcToDestPair.first] = Graph(record)
         tidToProcessor[record.tid] = srcToDestPair.first
+        return srcToDestPair
     }
 
     fun getMergePair(): Pair<Int, Int> {
@@ -92,4 +93,6 @@ class Manager: AbstractVerticle() {
             }
         }
     }
+
+    private fun generateLabel(param: Int): String = "g" + param.toString()
 }
