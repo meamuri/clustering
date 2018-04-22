@@ -30,3 +30,8 @@ MATCH (f:g1) where f.body=$specialValue
 CREATE (t:g1) set t.body=$otherValue
 CREATE (f)-[:Linked {min: $min, max: $max, delta: $delta, dispersion: $d}]->(t)       
 ```
+
+```
+MATCH (f:g0), (t:g0) where f.body = "SQL" AND t.body = "SQL"
+                CREATE (f)-[:Linked {min: 0.5}]->(t)
+```

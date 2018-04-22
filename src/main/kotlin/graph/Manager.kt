@@ -40,9 +40,10 @@ class Manager: AbstractVerticle() {
         val processorIndex = tidToProcessor[record.tid]
         if (processorIndex != null) {
             val prevNode = graphs[processorIndex].getCurrentNode().body
+            val isLoop = graphs[processorIndex].nodes.containsKey(record.body.hashCode())
             graphs[processorIndex].registerRecord(record)
             val lbl = "g" + processorIndex.toString()
-            return WasProcessed(lbl, prevNode, record.body, record.timestamp, Weight(record.timestamp))
+            return WasProcessed(lbl, prevNode, record.body, record.timestamp, Weight(record.timestamp), isLoop)
         }
         if (countOfGraphs == ManagerControlMax) {
             clustering(record)

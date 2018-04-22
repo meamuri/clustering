@@ -26,6 +26,11 @@ class NeoVertex: AbstractVerticle() {
             "CREATE (f)-[:Linked {min: \$MIN, max: \$MAX, delta: \$DELTA, dispersion: \$D}]->(t)"
     }
 
+    private val addLoopToExistedNode = { validGraphName: String ->
+        "MATCH (f:$validGraphName), (t:$validGraphName) where f.body = \$FROM AND t.body = \$TO \n" +
+                "CREATE (f)-[:Linked {min: \$MIN, max: \$MAX, delta: \$DELTA, dispersion: \$D}]->(t) \n" +
+                "SET t.ts = \$TS"
+    }
 
     private val driver = GraphDatabase.driver(connAddress, AuthTokens.basic(username, password))
 
@@ -46,13 +51,38 @@ class NeoVertex: AbstractVerticle() {
             }
             ResultType.Processed.name -> {
                 val json = Gson().fromJson(r.toString(), WasProcessed::class.java)
-                writeNodeAndLinking(json.label, json.prevBody, json.body,
-                        Instant.ofEpochMilli(json.ts), json.min, json.max, json.delta, json.dispersion)
+                if (json.isLoop) {
+                    writeLoopRelation(json.label, json.prevBody, json.body,
+                            Instant.ofEpochMilli(json.ts), json.min, json.max, json.delta, json.dispersion)
+                } else {
+                    writeNodeAndLinking(json.label, json.prevBody, json.body,
+                            Instant.ofEpochMilli(json.ts), json.min, json.max, json.delta, json.dispersion)
+                }
             }
             else -> return
         }
     }
 
+    private fun writeLoopRelation(graphLabel: String, prevNode: String,
+                                  body: String, ts: Instant, min: Long,
+                                  max: Long, delta: Long, dispersion: Double) {
+        val session = driver.session()
+
+        session.use {
+            session.writeTransaction { tx ->
+                tx.run(addLoopToExistedNode(graphLabel),
+                        Values.parameters(
+                                "FROM", prevNode,
+                                "TO", body,
+                                "TS", ts.toEpochMilli(),
+                                "MIN", min,
+                                "MAX", max,
+                                "DELTA", delta,
+                                "D", dispersion
+                        ))
+            }
+        } // .. session use
+    }
 
     private fun writeNodeAndLinking(graphLabel: String, prevNode: String,
                                     body: String, ts: Instant, min: Long,

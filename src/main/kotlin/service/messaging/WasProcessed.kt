@@ -3,8 +3,9 @@ package service.messaging
 import graph.Weight
 import io.vertx.core.json.JsonObject
 
-class WasProcessed(val label: String, val prevBody: String, val body: String, val ts: Long, w: Weight)
-    : ResultMessage(ResultType.Processed) {
+class WasProcessed(val label: String, val prevBody: String,
+                   val body: String, val ts: Long, w: Weight, val isLoop: Boolean)
+                    : ResultMessage(ResultType.Processed) {
     val min = w.min
     val max = w.max
     val delta = w.delta
@@ -19,6 +20,7 @@ class WasProcessed(val label: String, val prevBody: String, val body: String, va
         obj.put("max", max)
         obj.put("delta", delta)
         obj.put("dispersion", dispersion)
+        obj.put("isLoop", isLoop)
         return obj
     }
 }
