@@ -1,9 +1,12 @@
 package service
 
 import io.vertx.core.AbstractVerticle
+import io.vertx.core.eventbus.Message
+import io.vertx.core.json.JsonObject
 import org.neo4j.driver.v1.AuthTokens
 import org.neo4j.driver.v1.GraphDatabase
 import org.neo4j.driver.v1.Values
+import settings.GraphSaverChannel
 import java.time.Instant
 
 private const val connAddress = "bolt://localhost:7687"
@@ -15,11 +18,15 @@ class NeoVertex: AbstractVerticle() {
     private val driver = GraphDatabase.driver(connAddress, AuthTokens.basic(username, password))
 
     override fun start() {
-
+        vertx.eventBus().consumer<JsonObject>(GraphSaverChannel, this::graphSnapshotHandler)
     }
 
     override fun stop() {
         driver.closeAsync()
+    }
+
+    private fun graphSnapshotHandler(message: Message<JsonObject>) {
+        message.body()
     }
 
     private fun writeNode(tid: Int, body: String, ts: Instant) {
