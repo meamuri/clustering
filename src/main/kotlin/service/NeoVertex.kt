@@ -17,10 +17,14 @@ class NeoVertex: AbstractVerticle() {
     private val username = "diplom-admin"
     private val password = "admin"
 
-    private val addNodeQuery = "CREATE (a:\$GRAPH {body: \$BODY, ts: \$TS})"
-    private val addNodeAndLinking = "MATCH (f:\$GRAPH) where f.body = \$BODY \n" +
-            "CREATE (t:\$GRAPH_SAME {body: \$NEW_BODY, {ts: \$NEW_TS }) \n" +
+    private val addNodeQuery = { validGraphName:String ->
+        "CREATE (a:$validGraphName) \n" +
+                "SET a.body = \$BODY, a.ts = \$TS"
+    }
+    private val addNodeAndLinking = { validGraphName: String -> "MATCH (f:$validGraphName) where f.body = \$BODY \n" +
+            "CREATE (t:$validGraphName {body: \$NEW_BODY, {ts: \$NEW_TS }) \n" +
             "CREATE (f)-[:Linked {min: \$MIN, max: \$MAX}, delta: \$DELTA, dispersion: \$D]->(t)"
+    }
 
 
     private val driver = GraphDatabase.driver(connAddress, AuthTokens.basic(username, password))
@@ -51,11 +55,9 @@ class NeoVertex: AbstractVerticle() {
 
         session.use {
             session.writeTransaction { tx ->
-                val result = tx.run(addNodeAndLinking,
+                val result = tx.run(addNodeAndLinking(graphLabel),
                         Values.parameters(
-                                "GRAPH", graphLabel,
                                 "BODY", prevNode,
-                                "GRAPH_SAME", graphLabel,
                                 "NEW_BODY", body,
                                 "TS", ts.toEpochMilli(),
                                 "MIN", w.min,
@@ -73,13 +75,13 @@ class NeoVertex: AbstractVerticle() {
 
         session.use {
              session.writeTransaction { tx ->
-                val result = tx.run(addNodeQuery,
+//                val result = tx.run(addNodeQuery(graphLabel),
+                tx.run(addNodeQuery(graphLabel),
                         Values.parameters(
-                                "GRAPH", graphLabel,
                                 "BODY", body,
-                                "TS", ts.toEpochMilli()
+                                "TS", ts.toEpochMilli().toString()
                         ))
-                result.single().get( 0 ).asString()
+//                result.single().get( 0 ).asString()
             }
         } // .. session use
     } // fun writeNode
