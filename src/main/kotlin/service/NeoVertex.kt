@@ -9,11 +9,12 @@ import org.neo4j.driver.v1.Values
 import settings.GraphSaverChannel
 import java.time.Instant
 
-private const val connAddress = "bolt://localhost:7687"
-private const val username = "diplom-admin"
-private const val password = "admin"
 
 class NeoVertex: AbstractVerticle() {
+    private val connAddress = "bolt://localhost:7687"
+    private val username = "diplom-admin"
+    private val password = "admin"
+
     private val addNodeQuery = "CREATE (a:\$tid {body: \$body, ts: \$ts})"
     private val driver = GraphDatabase.driver(connAddress, AuthTokens.basic(username, password))
 

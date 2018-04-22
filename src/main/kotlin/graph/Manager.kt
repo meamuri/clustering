@@ -1,15 +1,25 @@
 package graph
 
 import api.Record
+import io.vertx.core.AbstractVerticle
+import settings.RecordsChannel
 
-const val ManagerControlMax = 5
-const val MetricLevel = 0.3
 
-class Manager {
-    val graphs: MutableList<Graph> = mutableListOf()
+class Manager: AbstractVerticle() {
+    private val graphs: MutableList<Graph> = mutableListOf()
     private val tidToProcessor: MutableMap<Int, Int> = mutableMapOf()
 
     val countOfGraphs get() = graphs.size
+
+    override fun start() {
+        vertx.eventBus().consumer<String>(RecordsChannel, {
+            val record = Record.fromJsonString(it.body())
+            if (record != null) {
+                registerRecord(record)
+            }
+            it.reply("ok")
+        })
+    }
 
     fun registerRecord(record: Record) {
         val processorIndex = tidToProcessor[record.tid]
