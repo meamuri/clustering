@@ -3,10 +3,11 @@ package graph
 import api.Record
 import java.time.Instant
 
+
 class Graph(initialRecord: Record) {
     private var currentNode: Int = initialRecord.body.hashCode()
     private val nodes: MutableMap<Int, Node> =
-            mutableMapOf(currentNode to Node(initialRecord.body, Instant.ofEpochSecond(initialRecord.timestamp)))
+            mutableMapOf(currentNode to Node(initialRecord.body, Instant.ofEpochMilli(initialRecord.timestamp)))
 
     fun registerRecord(record: Record) {
         val timestamp = Instant.ofEpochMilli(record.timestamp)
@@ -47,6 +48,8 @@ class Graph(initialRecord: Record) {
                 })
             }
         })
+        if (getCurrentNode().timestamp < graph.getCurrentNode().timestamp)
+            currentNode = graph.currentNode
     }
 
     private fun addNode(nodeAddress: Int, body: String, timestamp: Instant) {
@@ -68,5 +71,7 @@ class Graph(initialRecord: Record) {
         val selfRelation = nodes[currentNode]!!.relations
         selfRelation[currentNode]?.recompute(timestamp) ?: selfRelation.put(currentNode, Weight(timestamp))
     }
+
+    fun getCurrentNode(): Node = nodes[currentNode]!!
 
 }

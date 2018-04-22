@@ -88,4 +88,16 @@ class ManagerTest {
         assertTrue { graph.getNodes().contains(srcToDestPair.first.toString()) }
     }
 
+    @Test
+    fun `current not should be latest after clustering`() {
+        val beforeClusteringLastIndex = ManagerControlMax - 1
+        val range = (0 .. beforeClusteringLastIndex)
+        range.map{ manager.registerRecord(recordGenerator(it, it.toString())) }
+        val nodeText = "CURR_NODE_AFTER_ALL"
+        manager.registerRecord(recordGenerator(beforeClusteringLastIndex, nodeText))
+        manager.registerRecord(recordGenerator(100, "100"))
+        val graph = manager.getGraphOfTid(beforeClusteringLastIndex)
+        assertEquals("CURR_NODE_AFTER_ALL", graph!!.getCurrentNode().body)
+    }
+
 }
