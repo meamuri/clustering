@@ -2,6 +2,11 @@ package graph
 
 import api.Record
 import io.vertx.core.AbstractVerticle
+import service.messaging.ResultMessage
+import service.messaging.WasClustered
+import service.messaging.WasCreated
+import service.messaging.WasProcessed
+import settings.GraphSaverChannel
 import settings.RecordsChannel
 
 
@@ -14,30 +19,37 @@ class Manager: AbstractVerticle() {
     override fun start() {
         vertx.eventBus().consumer<String>(RecordsChannel, {
             val record = Record.fromJsonString(it.body())
-            if (record != null) {
-                registerRecord(record)
-            }
             it.reply("ok")
+            if (record == null) {
+            } else {
+                val res = registerRecord(record)
+                vertx.eventBus().send(GraphSaverChannel, res.toJsonObject())
+            }
         })
 
         vertx.setPeriodic(15000, {
-            println(graphs.size)
-            println(graphs.lastOrNull()?.nodes?.size)
+            println("graph count: " + graphs.size)
+            graphs.forEachIndexed({ index, graph ->
+                println("\t*$index : graph size -- ${graph.nodes.size}")
+            })
         })
     }
 
-    fun registerRecord(record: Record) {
+    fun registerRecord(record: Record): ResultMessage {
         val processorIndex = tidToProcessor[record.tid]
         if (processorIndex != null) {
+            val prevNode = graphs[processorIndex].getCurrentNode().body
             graphs[processorIndex].registerRecord(record)
-            return
+            val lbl = "g" + processorIndex.toString()
+            return WasProcessed(lbl, prevNode, record.body, record.timestamp, Weight(record.timestamp))
         }
         if (countOfGraphs == ManagerControlMax) {
             clustering(record)
-            return
+            return WasClustered()
         }
         graphs.add(Graph(record))
         tidToProcessor[record.tid] = graphs.lastIndex
+        return WasCreated("g" + graphs.lastIndex.toString(), record.body, record.timestamp)
     }
 
     fun findTidProcessor(tid: Int): Int = tidToProcessor[tid] ?: -1
