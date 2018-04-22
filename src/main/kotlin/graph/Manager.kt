@@ -19,6 +19,11 @@ class Manager: AbstractVerticle() {
             }
             it.reply("ok")
         })
+
+        vertx.setPeriodic(15000, {
+            println(graphs.size)
+            println(graphs.lastOrNull()?.nodes?.size)
+        })
     }
 
     fun registerRecord(record: Record) {

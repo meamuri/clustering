@@ -7,7 +7,6 @@ import io.vertx.core.json.JsonObject
 import org.neo4j.driver.v1.*
 import settings.GraphSaverChannel
 import java.time.Instant
-import java.time.LocalTime
 
 
 class NeoVertex: AbstractVerticle() {
