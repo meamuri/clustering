@@ -1,13 +1,13 @@
 package service
 
 import com.google.gson.Gson
-import graph.Weight
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.eventbus.Message
 import io.vertx.core.json.JsonObject
 import org.neo4j.driver.v1.*
 import service.messaging.ResultType
 import service.messaging.WasCreated
+import service.messaging.WasProcessed
 import settings.GraphSaverChannel
 import java.time.Instant
 
@@ -22,8 +22,8 @@ class NeoVertex: AbstractVerticle() {
                 "SET a.body = \$BODY, a.ts = \$TS"
     }
     private val addNodeAndLinking = { validGraphName: String -> "MATCH (f:$validGraphName) where f.body = \$BODY \n" +
-            "CREATE (t:$validGraphName {body: \$NEW_BODY, {ts: \$NEW_TS }) \n" +
-            "CREATE (f)-[:Linked {min: \$MIN, max: \$MAX}, delta: \$DELTA, dispersion: \$D]->(t)"
+            "CREATE (t:$validGraphName {body: \$NEW_BODY, ts: \$TS }) \n" +
+            "CREATE (f)-[:Linked {min: \$MIN, max: \$MAX, delta: \$DELTA, dispersion: \$D}]->(t)"
     }
 
 
@@ -44,28 +44,33 @@ class NeoVertex: AbstractVerticle() {
                 val wasCreated = Gson().fromJson(r.toString(), WasCreated::class.java)
                 writeNode(wasCreated.label, wasCreated.body, Instant.ofEpochMilli(wasCreated.ts))
             }
+            ResultType.Processed.name -> {
+                val json = Gson().fromJson(r.toString(), WasProcessed::class.java)
+                writeNodeAndLinking(json.label, json.prevBody, json.body,
+                        Instant.ofEpochMilli(json.ts), json.min, json.max, json.delta, json.dispersion)
+            }
             else -> return
         }
     }
 
 
     private fun writeNodeAndLinking(graphLabel: String, prevNode: String,
-                                    body: String, ts: Instant, w: Weight) {
+                                    body: String, ts: Instant, min: Long,
+                                    max: Long, delta: Long, dispersion: Double) {
         val session = driver.session()
 
         session.use {
             session.writeTransaction { tx ->
-                val result = tx.run(addNodeAndLinking(graphLabel),
+                tx.run(addNodeAndLinking(graphLabel),
                         Values.parameters(
                                 "BODY", prevNode,
                                 "NEW_BODY", body,
                                 "TS", ts.toEpochMilli(),
-                                "MIN", w.min,
-                                "MAX", w.max,
-                                "DELTA", w.delta,
-                                "D", w.dispersion
+                                "MIN", min,
+                                "MAX", max,
+                                "DELTA", delta,
+                                "D", dispersion
                         ))
-                result.single().get( 0 ).asString()
             }
         } // .. session use
     }
@@ -75,13 +80,11 @@ class NeoVertex: AbstractVerticle() {
 
         session.use {
              session.writeTransaction { tx ->
-//                val result = tx.run(addNodeQuery(graphLabel),
                 tx.run(addNodeQuery(graphLabel),
                         Values.parameters(
                                 "BODY", body,
                                 "TS", ts.toEpochMilli().toString()
                         ))
-//                result.single().get( 0 ).asString()
             }
         } // .. session use
     } // fun writeNode
