@@ -6,7 +6,7 @@ const val ManagerControlMax = 5
 const val MetricLevel = 0.3
 
 class Manager {
-    private val graphs: MutableList<Graph> = mutableListOf()
+    val graphs: MutableList<Graph> = mutableListOf()
     private val tidToProcessor: MutableMap<Int, Int> = mutableMapOf()
 
     val countOfGraphs get() = graphs.size

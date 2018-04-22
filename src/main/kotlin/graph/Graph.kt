@@ -6,7 +6,7 @@ import java.time.Instant
 
 class Graph(initialRecord: Record) {
     private var currentNode: Int = initialRecord.body.hashCode()
-    private val nodes: MutableMap<Int, Node> =
+    val nodes: MutableMap<Int, Node> =
             mutableMapOf(currentNode to Node(initialRecord.body, Instant.ofEpochMilli(initialRecord.timestamp)))
 
     fun registerRecord(record: Record) {
