@@ -1,10 +1,13 @@
 package service
 
+import com.google.gson.Gson
 import graph.Weight
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.eventbus.Message
 import io.vertx.core.json.JsonObject
 import org.neo4j.driver.v1.*
+import service.messaging.ResultType
+import service.messaging.WasCreated
 import settings.GraphSaverChannel
 import java.time.Instant
 
@@ -15,8 +18,8 @@ class NeoVertex: AbstractVerticle() {
     private val password = "admin"
 
     private val addNodeQuery = "CREATE (a:\$GRAPH {body: \$BODY, ts: \$TS})"
-    private val addNodeAndLinking = "MATCH (f:\$GRAPH) where f.body = \$BODY" +
-            "CREATE (t:\$GRAPH_SAME {body: \$NEW_BODY, {ts: \$NEW_TS })" +
+    private val addNodeAndLinking = "MATCH (f:\$GRAPH) where f.body = \$BODY \n" +
+            "CREATE (t:\$GRAPH_SAME {body: \$NEW_BODY, {ts: \$NEW_TS }) \n" +
             "CREATE (f)-[:Linked {min: \$MIN, max: \$MAX}, delta: \$DELTA, dispersion: \$D]->(t)"
 
 
@@ -31,7 +34,14 @@ class NeoVertex: AbstractVerticle() {
     }
 
     private fun graphSnapshotHandler(message: Message<JsonObject>) {
-        message.body()
+        val r = message.body()
+        when (r.getString("resultType")) {
+            ResultType.Created.name -> {
+                val wasCreated = Gson().fromJson(r.toString(), WasCreated::class.java)
+                writeNode(wasCreated.label, wasCreated.body, Instant.ofEpochMilli(wasCreated.ts))
+            }
+            else -> return
+        }
     }
 
 
@@ -41,7 +51,7 @@ class NeoVertex: AbstractVerticle() {
 
         session.use {
             session.writeTransaction { tx ->
-                val result = tx.run(addNodeQuery,
+                val result = tx.run(addNodeAndLinking,
                         Values.parameters(
                                 "GRAPH", graphLabel,
                                 "BODY", prevNode,
@@ -63,7 +73,7 @@ class NeoVertex: AbstractVerticle() {
 
         session.use {
              session.writeTransaction { tx ->
-                val result = tx.run(addNodeAndLinking,
+                val result = tx.run(addNodeQuery,
                         Values.parameters(
                                 "GRAPH", graphLabel,
                                 "BODY", body,

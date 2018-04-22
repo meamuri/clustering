@@ -17,10 +17,11 @@ class Manager: AbstractVerticle() {
     val countOfGraphs get() = graphs.size
 
     override fun start() {
-        vertx.eventBus().consumer<String>(RecordsChannel, {
+        vertx.eventBus().consumer<String>(RecordsChannel, lbl@{
             val record = Record.fromJsonString(it.body())
             it.reply("ok")
             if (record == null) {
+                return@lbl
             } else {
                 val res = registerRecord(record)
                 vertx.eventBus().send(GraphSaverChannel, res.toJsonObject())
@@ -30,7 +31,7 @@ class Manager: AbstractVerticle() {
         vertx.setPeriodic(15000, {
             println("graph count: " + graphs.size)
             graphs.forEachIndexed({ index, graph ->
-                println("\t*$index : graph size -- ${graph.nodes.size}")
+                println("\t * ${index + 1} : graph size -- ${graph.nodes.size}")
             })
         })
     }
