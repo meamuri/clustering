@@ -35,3 +35,21 @@ CREATE (f)-[:Linked {min: $min, max: $max, delta: $delta, dispersion: $d}]->(t)
 MATCH (f:g0), (t:g0) where f.body = "SQL" AND t.body = "SQL"
                 CREATE (f)-[:Linked {min: 0.5}]->(t)
 ```
+
+```
+MATCH (n:g0)-[:Linked {min: nmin, max: nmax, delta: ndelta, dispersia: nd}]->(nr) 
+MATCH (g:g4)-[:Linked {min: gmin, max: gmax, delta: gdelta, dispersia: gd}]->(gr:g4)
+MERGE (n:g0 {body: g.body})-[:Linked {}]->(gr:g0)
+return n, nr, g, gr
+
+MATCH (g:g1) 
+MERGE (v:g0 {body: g.body}) 
+set v.ts = g.ts return v
+
+MATCH (prev:g1)-[r:Linked]->(prevr:g1)
+MATCH (g:g0 {body: prev.body}), (gr:g0 {body: prevr.body})
+MERGE (g)-[w:Linked]->(gr)
+set w = {min:r.min, min: r.max, delta: r.delta, dispersion: r.dispersion}
+RETURN g, w, gr
+
+```
