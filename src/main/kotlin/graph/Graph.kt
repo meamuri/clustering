@@ -17,7 +17,7 @@ class Graph(initialRecord: Record) {
             return
         }
         addNode(hashOfNode, record.body, timestamp)
-        addRelation(currentNode, hashOfNode, timestamp)
+        addRelation(currentNode, hashOfNode, timestamp.toEpochMilli())
         currentNode = hashOfNode
     }
 
@@ -60,7 +60,7 @@ class Graph(initialRecord: Record) {
         }
     }
 
-    private fun addRelation(source: Int, destination: Int, visitedTimestamp: Instant) {
+    private fun addRelation(source: Int, destination: Int, visitedTimestamp: Long) {
         val relationsOfSource = nodes[source]!!.relations
         relationsOfSource[destination]?.recompute(visitedTimestamp)
                 ?: relationsOfSource.put(destination, Weight(visitedTimestamp))
@@ -69,7 +69,8 @@ class Graph(initialRecord: Record) {
     private fun addLoop(timestamp: Instant) {
         nodes[currentNode]!!.timestamp = timestamp
         val selfRelation = nodes[currentNode]!!.relations
-        selfRelation[currentNode]?.recompute(timestamp) ?: selfRelation.put(currentNode, Weight(timestamp))
+        val milliSec = timestamp.toEpochMilli()
+        selfRelation[currentNode]?.recompute(milliSec) ?: selfRelation.put(currentNode, Weight(milliSec))
     }
 
     fun getCurrentNode(): Node = nodes[currentNode]!!

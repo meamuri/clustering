@@ -1,20 +1,18 @@
 package graph
 
-import java.time.Instant
-
-class Weight(timestamp: Instant) {
+class Weight(timestamp: Long) {
     var cnt = 1
         private set
-    var min = timestamp
+    var min: Long = timestamp
         private set
-    var max = timestamp
+    var max: Long = timestamp
         private set
-    var delta: Instant = Instant.MIN
+    var delta: Long = 0
         private set
     var dispersion = 0.0
         private set
 
-    fun recompute(timestamp: Instant) {
+    fun recompute(timestamp: Long) {
         cnt++
         if (timestamp < min) {
             min = timestamp
@@ -32,7 +30,7 @@ class Weight(timestamp: Instant) {
     }
 
     private fun recompute() {
-        delta = max.minusMillis(min.toEpochMilli())
-        dispersion = delta.toEpochMilli() / cnt.toDouble()
+        delta = max - min
+        dispersion = delta / cnt.toDouble()
     }
 }

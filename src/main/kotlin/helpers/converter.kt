@@ -9,8 +9,8 @@ import io.vertx.core.json.JsonObject
 
 fun Weight.toJsonObject(): JsonObject {
     val res = JsonObject()
-    res.put("min", this.min.toEpochMilli())
-    res.put("max", this.max.toEpochMilli())
+    res.put("min", this.min)
+    res.put("max", this.max)
     res.put("delta", this.delta)
     res.put("dispersion", this.dispersion)
     return res
