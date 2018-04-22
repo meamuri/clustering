@@ -31,8 +31,19 @@ class NeoVertex: AbstractVerticle() {
                 "CREATE (f)-[:Linked {min: \$MIN, max: \$MAX, delta: \$DELTA, dispersion: \$D}]->(t) \n" +
                 "SET t.ts = \$TS"
     }
-    private fun swapLabel(from: String, to: String): String =
-            "MATCH (node:$from) remove (node:$from) set (node:$to)"
+    private fun appendNodes(from: String, to: String): String =
+            "MATCH (g:$from) \n" +
+                    "MERGE (v:$to {body: g.body}) \n" +
+                    "set v.ts = g.ts"
+    private fun mergeEdges(from: String, to: String) =
+            "MATCH (prev:$from)-[r:Linked]->(prevr:$from)\n" +
+                    "MATCH (g:$to {body: prev.body}), (gr:$to {body: prevr.body})\n" +
+                    "MERGE (g)-[w:Linked]->(gr)\n" +
+                    "set w = {min:r.min, min: r.max, delta: r.delta, dispersion: r.dispersion}"
+    private fun removeOld(graphLabel: String): String =
+            "MATCH (prev:$graphLabel)\n" +
+                    "detach delete prev"
+
 
     private val driver = GraphDatabase.driver(connAddress, AuthTokens.basic(username, password))
 
@@ -130,7 +141,9 @@ class NeoVertex: AbstractVerticle() {
 
         session.use {
             session.writeTransaction { tx ->
-                tx.run(swapLabel(labelBefore, labelAfter))
+                tx.run(appendNodes(labelBefore, labelAfter))
+                tx.run(mergeEdges(labelBefore, labelAfter))
+                tx.run(removeOld(labelBefore))
             }
         } // .. session use
     }

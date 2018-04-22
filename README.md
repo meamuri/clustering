@@ -44,7 +44,8 @@ return n, nr, g, gr
 
 MATCH (g:g1) 
 MERGE (v:g0 {body: g.body}) 
-set v.ts = g.ts return v
+set v.ts = g.ts 
+return v
 
 MATCH (prev:g1)-[r:Linked]->(prevr:g1)
 MATCH (g:g0 {body: prev.body}), (gr:g0 {body: prevr.body})
