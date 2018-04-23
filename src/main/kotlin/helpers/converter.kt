@@ -1,5 +1,6 @@
 package helpers
 
+import api.Record
 import graph.Graph
 import graph.Node
 import graph.Weight
@@ -13,6 +14,15 @@ fun Weight.toJsonObject(): JsonObject {
     res.put("max", this.max)
     res.put("delta", this.delta)
     res.put("dispersion", this.dispersion)
+    return res
+}
+
+fun Record.toJsonObject(): JsonObject {
+    val res = JsonObject()
+    res.put("tid", this.tid)
+    res.put("body", this.body)
+    res.put("timestamp", this.timestamp)
+    res.put("parameters", JsonArray(this.parameters))
     return res
 }
 
