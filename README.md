@@ -48,7 +48,8 @@ set v.ts = g.ts
 return v
 
 MATCH (prev:g1)-[r:Linked]->(prevr:g1)
-MATCH (g:g0 {body: prev.body}), (gr:g0 {body: prevr.body})
+MATCH (g:g0 {body: prev.body})
+MATCH (gr:g0 {body: prevr.body})
 MERGE (g)-[w:Linked]->(gr)
 set w = {min:r.min, min: r.max, delta: r.delta, dispersion: r.dispersion}
 RETURN g, w, gr

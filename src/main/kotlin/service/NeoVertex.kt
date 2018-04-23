@@ -20,7 +20,7 @@ class NeoVertex: AbstractVerticle() {
 
     private val addNodeQuery = { validGraphName:String ->
         "CREATE (a:$validGraphName) \n" +
-                "SET a.body = \$BODY, a.ts = \$TS"
+        "SET a.body = \$BODY, a.ts = \$TS"
     }
     private val addNodeAndLinking = { validGraphName: String -> "MATCH (f:$validGraphName) where f.body = \$BODY \n" +
             "CREATE (t:$validGraphName {body: \$NEW_BODY, ts: \$TS }) \n" +
@@ -28,21 +28,22 @@ class NeoVertex: AbstractVerticle() {
     }
     private val addLoopToExistedNode = { validGraphName: String ->
         "MATCH (f:$validGraphName), (t:$validGraphName) where f.body = \$FROM AND t.body = \$TO \n" +
-                "CREATE (f)-[:Linked {min: \$MIN, max: \$MAX, delta: \$DELTA, dispersion: \$D}]->(t) \n" +
-                "SET t.ts = \$TS"
+        "CREATE (f)-[:Linked {min: \$MIN, max: \$MAX, delta: \$DELTA, dispersion: \$D}]->(t) \n" +
+        "SET t.ts = \$TS"
     }
     private fun appendNodes(from: String, to: String): String =
             "MATCH (g:$from) \n" +
-                    "MERGE (v:$to {body: g.body}) \n" +
-                    "set v.ts = g.ts"
+            "MERGE (v:$to {body: g.body}) \n" +
+            "set v.ts = g.ts"
     private fun mergeEdges(from: String, to: String) =
             "MATCH (prev:$from)-[r:Linked]->(prevr:$from)\n" +
-                    "MATCH (g:$to {body: prev.body}), (gr:$to {body: prevr.body})\n" +
-                    "MERGE (g)-[w:Linked]->(gr)\n" +
-                    "set w = {min:r.min, min: r.max, delta: r.delta, dispersion: r.dispersion}"
+            "MATCH (g:$to {body: prev.body})\n" +
+            "MATCH (gr:$to {body: prevr.body})\n" +
+            "MERGE (g)-[w:Linked]->(gr)\n" +
+            "set w = {min:r.min, min: r.max, delta: r.delta, dispersion: r.dispersion}"
     private fun removeOld(graphLabel: String): String =
             "MATCH (prev:$graphLabel)\n" +
-                    "detach delete prev"
+            "detach delete prev"
 
 
     private val driver = GraphDatabase.driver(connAddress, AuthTokens.basic(username, password))
