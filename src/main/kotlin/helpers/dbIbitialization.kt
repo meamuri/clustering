@@ -31,7 +31,7 @@ private val records = listOf(
         Record(4, "db.collection.find({id: ??}.toArray()", gen(), listOf()),
         Record(4, "db.collection.find({id: ??}.limit(?)", gen(), listOf()),
 
-        Record(4, "MATCH (f:?) where f.body=?", gen(), listOf())
+        Record(5, "MATCH (f:?) where f.body=?", gen(), listOf())
 
 )
 
