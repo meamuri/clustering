@@ -15,7 +15,7 @@ fun timeGenerator(): () -> Long {
 val gen = timeGenerator()
 
 private val records = listOf(
-        Record(1, "SELECT * FROM ", gen(), listOf()),
+        Record(1, "SELECT * FROM t", gen(), listOf()),
         Record(1, "query {repository(owner: \"user\") {name. description} }", gen(), listOf()),
         Record(1, "MATCH (f:?) where f.body=?", gen(), listOf()),
 
