@@ -1,0 +1,9 @@
+channels:
+    records: "records.feed"
+    graph: "graph.feed"
+
+server:
+    port: 8080
+
+launcher:
+    shouldBeInitialize: true
