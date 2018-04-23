@@ -75,7 +75,7 @@ class NeoVertex: AbstractVerticle() {
             }
             ResultType.Clustered.name -> {
                 val json = Gson().fromJson(r.toString(), WasClustered::class.java)
-                clusterIt(json.labelBefore, json.labelAfter)
+                clusterIt(json.labelBefore, json.labelAfter, json.body, json.ts)
             }
             else -> return
         }
@@ -137,7 +137,7 @@ class NeoVertex: AbstractVerticle() {
         } // .. session use
     } // fun writeNode
 
-    private fun clusterIt(labelBefore: String, labelAfter: String) {
+    private fun clusterIt(labelBefore: String, labelAfter: String, body: String, ts: Long) {
         val session = driver.session()
 
         session.use {
@@ -145,6 +145,10 @@ class NeoVertex: AbstractVerticle() {
                 tx.run(appendNodes(labelBefore, labelAfter))
                 tx.run(mergeEdges(labelBefore, labelAfter))
                 tx.run(removeOld(labelBefore))
+                tx.run(addNodeQuery(labelBefore), Values.parameters(
+                        "BODY", body,
+                        "TS", ts
+                ))
             }
         } // .. session use
     }

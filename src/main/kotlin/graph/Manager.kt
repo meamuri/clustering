@@ -47,7 +47,7 @@ class Manager: AbstractVerticle() {
         }
         if (countOfGraphs == ManagerControlMax) {
             val pair = clustering(record)
-            return WasClustered(generateLabel(pair.first), generateLabel(pair.second))
+            return WasClustered(generateLabel(pair.first), generateLabel(pair.second), record.body, record.timestamp)
         }
         graphs.add(Graph(record))
         tidToProcessor[record.tid] = graphs.lastIndex
