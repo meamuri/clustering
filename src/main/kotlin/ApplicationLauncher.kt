@@ -14,7 +14,7 @@ fun main(args: Array<String>) {
     vertex.deployVerticle(Manager::class.java.name)
     vertex.deployVerticle(NeoVertex::class.java.name, DeploymentOptions().setWorker(true))
     vertex.deployVerticle(Receiver::class.java.name)
-    if (WithBaseInitialization) {
+    if (WithBaseInitialization()) {
         initDatabase(vertex.eventBus())
     }
 }
